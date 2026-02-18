@@ -1,0 +1,61 @@
+﻿
+  GET|HEAD        / .............................................................................................................................. 
+  GET|HEAD        admin ............................................................................................................... admin.home
+  GET|HEAD        admin/products .................................................................. products.index ΓÇ║ Admin\ProductController@index
+  POST            admin/products .................................................................. products.store ΓÇ║ Admin\ProductController@store
+  GET|HEAD        admin/products/create ......................................................... products.create ΓÇ║ Admin\ProductController@create
+  GET|HEAD        admin/products/{product} .......................................................... products.show ΓÇ║ Admin\ProductController@show
+  PUT|PATCH       admin/products/{product} ...................................................... products.update ΓÇ║ Admin\ProductController@update
+  DELETE          admin/products/{product} .................................................... products.destroy ΓÇ║ Admin\ProductController@destroy
+  GET|HEAD        admin/products/{product}/edit ..................................................... products.edit ΓÇ║ Admin\ProductController@edit
+  POST            api/auth/login .............................................................................. auth. ΓÇ║ Api\AuthorController@login
+  GET|HEAD        api/products ............................................................................... Api\ProductController@getAllProduct
+  GET|HEAD        car ............................................................................................................................ 
+  GET|HEAD        categories ..................................................................................................................... 
+  GET|HEAD        categories/add ............................................................... categories.add ΓÇ║ CategoriesController@addcategory
+  POST            categories/add .................................................... categories.handleAdd ΓÇ║ CategoriesController@hanleAddCategory
+  GET|HEAD        categories/edit/{id} ........................................................ categories.edit ΓÇ║ CategoriesController@getCategory
+  PUT             categories/update/{id} ................................................. categories.update ΓÇ║ CategoriesController@updateCategory
+  GET|HEAD        categories/upload ............................................................ categories.getfile ΓÇ║ CategoriesController@getfile
+  POST            categories/upload ............................................................ categories.file ΓÇ║ CategoriesController@handleFile
+  GET|HEAD        country ........................................................................................................................ 
+  GET|HEAD        dowload-image ...................................................................... dowload-Image ΓÇ║ HomeController@dowloadImage
+  GET|HEAD        home ............................................................................................... home ΓÇ║ HomeController@index
+  GET|HEAD        login ............................................................................... login ΓÇ║ Auth\LoginController@showLoginForm
+  POST            login ............................................................................................... Auth\LoginController@login
+  POST            logout .................................................................................... logout ΓÇ║ Auth\LoginController@logout
+  GET|HEAD        mechanics ...................................................................................................................... 
+  GET|HEAD        owner .......................................................................................................................... 
+  GET|HEAD        password/confirm ............................................. password.confirm ΓÇ║ Auth\ConfirmPasswordController@showConfirmForm
+  POST            password/confirm ........................................................................ Auth\ConfirmPasswordController@confirm
+  POST            password/email ............................................... password.email ΓÇ║ Auth\ForgotPasswordController@sendResetLinkEmail
+  GET|HEAD        password/reset ............................................ password.request ΓÇ║ Auth\ForgotPasswordController@showLinkRequestForm
+  POST            password/reset ............................................................ password.update ΓÇ║ Auth\ResetPasswordController@reset
+  GET|HEAD        password/reset/{token} ............................................. password.reset ΓÇ║ Auth\ResetPasswordController@showResetForm
+  GET|HEAD        post ........................................................................................................................... 
+  GET|HEAD        posts ....................................................................................... posts.index ΓÇ║ PostController@index
+  GET|HEAD        posts/add ....................................................................................... posts.add ΓÇ║ PostController@add
+  POST            posts/delete-any ................................................................... posts.delete-any ΓÇ║ PostController@deleteAny
+  GET|HEAD        posts/delete/{id} ......................................................................... posts.delete ΓÇ║ PostController@delete
+  GET|HEAD        posts/edit/{id} ........................................................................... posts.update ΓÇ║ PostController@update
+  GET|HEAD        postss ......................................................................................................................... 
+  GET|HEAD        products ................................................................................... product ΓÇ║ HomeController@getProduct
+  GET|HEAD        register ............................................................... register ΓÇ║ Auth\RegisterController@showRegistrationForm
+  POST            register ...................................................................................... Auth\RegisterController@register
+  GET|HEAD        sanpham/{id} .................................................................. product.detail ΓÇ║ HomeController@getDetailProduct
+  GET|HEAD        storage/{path} ................................................................................................... storage.local
+  GET|HEAD        them-product ..................................................................... getadd-product ΓÇ║ HomeController@getaddProduct
+  POST            them-product ........................................................................... add-product ΓÇ║ HomeController@addProduct
+  GET|HEAD        unicode ........................................................................................................................ 
+  GET|HEAD        up ............................................................................................................................. 
+  GET|HEAD        user ........................................................................................ users.index ΓÇ║ UserController@index
+  GET|HEAD        user/add ........................................................................................ users.add ΓÇ║ UserController@add
+  POST            user/add ................................................................................ users.postadd ΓÇ║ UserController@postadd
+  GET|HEAD        user/delete/{id} .......................................................................... users.delete ΓÇ║ UserController@delete
+  GET|HEAD        user/edit/{id} ............................................................................. users.edit ΓÇ║ UserController@getEdit
+  GET|HEAD        user/hoc-relation ................................................................... users.relations ΓÇ║ UserController@relations
+  POST            user/update ........................................................................... users.postEdit ΓÇ║ UserController@postEdit
+  GET|HEAD        user1 .......................................................................................................................... 
+
+                                                                                                                               Showing [57] routes
+
