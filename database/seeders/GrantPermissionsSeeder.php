@@ -14,8 +14,8 @@ class GrantPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Grant full permissions to Group 3 ("Xếp")
-        $group = Groups::find(3);
+        // Grant full permissions to Group Administrator
+        $group = Groups::where('name', 'Administrator')->first();
         if ($group) {
             $modules = Modules::all();
             $permissions = [];
@@ -24,9 +24,9 @@ class GrantPermissionsSeeder extends Seeder
             }
             $group->permissions = json_encode($permissions);
             $group->save();
-            $this->command->info('Granted full permissions to Group 3 (Xếp).');
+            $this->command->info('Granted full permissions to Group Administrator.');
         } else {
-            $this->command->error('Group 3 not found.');
+            $this->command->error('Group Administrator not found.');
         }
     }
 }

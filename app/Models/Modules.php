@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Modules extends Model
 {
-    //
-    protected $table ='modules';
+    use HasFactory;
+
+    protected $table = 'modules';
+
+    protected $fillable = [
+        'name',
+        'title',
+        'description',
+    ];
 }

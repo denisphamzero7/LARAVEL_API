@@ -2,33 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Groups;
-class User extends Authenticatable implements MustVerifyEmail
+// use Laravel\Sanctum\HasApiTokens;
+
+class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
+    // 1. Thêm mảng này để set giá trị mặc định cho Model
+    protected $attributes = [
+        'user_id' => 0,
+    ];
     protected $fillable = [
         'name',
         'email',
         'password',
+        'group_id',
         'user_id',
-        'group_id'
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -47,7 +51,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
     public function group(){
-        return $this->belongsTo(Groups::class);
+        return $this->belongsTo(Groups::class, 'group_id', 'id');
     }
 }

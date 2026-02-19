@@ -11,6 +11,7 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\Modules;
+use Illuminate\Support\Facades\Cache;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -19,9 +20,9 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Post::class => PostPolicy::class,
+        // Post::class => PostPolicy::class,
         User::class => UserPolicy::class,
-        Groups::class => GroupPolicy::class,
+        // Groups::class => GroupPolicy::class,
     ];
 
     /**
@@ -47,7 +48,13 @@ class AuthServiceProvider extends ServiceProvider
         //     // dd($post);
         // });
         // 1, lấy danh sách module
-         $modulesList = Modules::all();
+         $modulesList = Cache::remember('modules_permissions', 3600, function () {
+             try {
+                 return Modules::all();
+             } catch (\Throwable $e) {
+                 return collect([]);
+             }
+         });
          if($modulesList->count()>0) {
             foreach ($modulesList as $module){
                 Gate::define($module->name,function (User $user) use ($module)  {

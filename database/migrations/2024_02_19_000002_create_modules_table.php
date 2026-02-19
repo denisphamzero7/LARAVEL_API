@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            //
-            $table
-            ->foreign('user_id')
-            ->references('id')
-            ->on('users');
+        Schema::create('modules', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique(); // Tên định danh (vd: posts, groups)
+            $table->string('title'); // Tên hiển thị
+            $table->string('description')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -25,9 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            //
-            $table->dropForeign('posts_user_id_foreign');
-        });
+        Schema::dropIfExists('modules');
     }
 };

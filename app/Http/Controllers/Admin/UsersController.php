@@ -34,6 +34,7 @@ class UsersController extends Controller
                     'email' => 'required|email|unique:users,email',
                      'password' => 'required|string|min:6',
                      'group_id' =>['required',function($attribute,$value,$fail){
+                     'group_id' =>['required','integer',function($attribute,$value,$fail){
                         if($value == 0){
                             $fail('Vui lòng chọn nhóm người dùng');
                         }
@@ -72,6 +73,7 @@ class UsersController extends Controller
                 'email' => 'required|email|unique:users,email,'.$user->id,
                  'password' => 'nullable|string|min:6',
                  'group_id' =>['required',function($attribute,$value,$fail){
+                 'group_id' =>['required','integer',function($attribute,$value,$fail){
                     if($value == 0){
                         $fail('Vui lòng chọn nhóm người dùng');
                     }

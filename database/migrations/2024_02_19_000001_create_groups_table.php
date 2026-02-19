@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('modules', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('title');
-            $table->text('description');
+        Schema::create('groups', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
+            $table->text('permissions')->nullable(); // Lưu chuỗi JSON phân quyền
+            $table->integer('user_id')->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('modules');
+        Schema::dropIfExists('groups');
     }
 };

@@ -2,28 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
+
 class Groups extends Model
 {
-    protected $table ='groups';
+    use HasFactory;
 
-     public function users(){
-    return $this->hasMany(
-       User::class,
-       'group_id','id'
-    );}
+    protected $table = 'groups';
 
+    protected $fillable = [
+        'name',
+        'description',
+        'user_id',
+        'permissions',
+    ];
 
-    public function postBy(){
-          return $this->belongsTo(User::class,'user_id','id');
+    public function users(){
+        return $this->hasMany(User::class, 'group_id', 'id');
     }
 
     public function getAll(){
-        $groups= DB::table($this->table)
-        ->orderBy('name','ASC')
-        ->get();
-        return $groups;
+        return $this->all();
     }
 }

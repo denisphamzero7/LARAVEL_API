@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Groups;
+use App\Models\Groups as Groups;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
