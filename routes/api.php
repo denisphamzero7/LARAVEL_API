@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AuthController;
 
 
 
@@ -18,7 +19,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
 
 });
 
-Route::prefix('user')->name('user.')->group(function(){
+Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function(){
     Route::get('/',[UserController::class,'index'])->name('index');
     Route::post('/',[UserController::class,'store'])->name('store');
     Route::get('/{user}',[UserController::class,'show'])->name('show');
@@ -26,3 +27,5 @@ Route::prefix('user')->name('user.')->group(function(){
     Route::patch('/{user}',[UserController::class,'update'])->name('update-patch');
     Route::delete('/{user}',[UserController::class,'destroy'])->name('destroy');
 });
+Route::post('login',[AuthController::class,'login'])->name('auth.login');
+Route::get('token',[AuthController::class,'getToken'])->middleware('auth:sanctum')->name('auth.token');

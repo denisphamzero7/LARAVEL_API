@@ -5,27 +5,43 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserCollection;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Danh sách user',
-            'data' => $users
-        ], 200);
+        $where = [];
+        if ($request->name) {
+            $where[] = ['name', 'like', '%' . $request->name . '%'];
+        }
+        if($request->email){
+            $where[]=['email','like','%'.$request->email.'%'];
+        }
+        $users = User::orderBy('id','desc');
+        if(!empty($where)){
+            $users = $users->where($where);
+        }
+        $users = $users->paginate(10);
+        if($users->count()){
+            $status = 200;
+            $statusText="success";
+        }else{
+            $status = 404;
+            $statusText="not found";
+        }
+        $users= new UserCollection($users,$status,$statusText);
+        return $users;
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {    
+    {
         $rules=[
             'name'=>'required',
             'email'=>'required|email|unique:users,email',
@@ -40,9 +56,9 @@ class UserController extends Controller
             'password.min'=>'Mật khẩu phải có ít nhất 6 ký tự',
         ];
         $request->validate($rules,$messages);
-        
+
         $user = User::create($request->all());
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'Tạo user thành công',
@@ -81,9 +97,9 @@ class UserController extends Controller
             'password.min'=>'Mật khẩu phải có ít nhất 6 ký tự',
         ];
         $request->validate($rules,$messages);
-        
+
         $user->update($request->all());
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'Cập nhật user thành công',
@@ -97,10 +113,12 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'Xóa user thành công',
         ], 200);
     }
+
+
 }
