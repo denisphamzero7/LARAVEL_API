@@ -20,7 +20,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
 
 });
 
-Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function(){
+Route::middleware('auth:api')->prefix('user')->name('user.')->group(function(){
     Route::get('/',[UserController::class,'index'])->name('index');
     Route::post('/',[UserController::class,'store'])->name('store');
     Route::get('/{user}',[UserController::class,'show'])->name('show');
@@ -29,7 +29,8 @@ Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function
     Route::delete('/{user}',[UserController::class,'destroy'])->name('destroy');
 });
 Route::post('login',[AuthController::class,'login'])->name('auth.login');
-Route::get('token',[AuthController::class,'getToken'])->middleware('auth:sanctum')->name('auth.token');
+Route::get('token',[AuthController::class,'getToken'])->middleware('auth:api')->name('auth.token');
+// Route::get('token',[AuthController::class,'getToken'])->middleware('auth:sanctum')->name('auth.token');
 Route::get('refreshtoken',[AuthController::class,'refreshToken'])->name('auth.refresh.token');
 Route::get('passport-token',function () {
     $user = User::find(1);

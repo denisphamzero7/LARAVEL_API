@@ -32,11 +32,18 @@ class AuthController extends Controller
             /** @var \App\Models\User $user */
             $user = Auth::user();
 
-            $token = $user->createToken('auth_token')->accessToken;
+            // $token = $user->createToken('auth_token')->accessToken;: sanctum
+            $tokenRessult = $user->createToken('auth_api');
+            $token= $tokenRessult->token;
+            $token->expires_at = Carbon::now()->addMinutes(60);
+            $expires=Carbon::parse($token->expires_at)->toDateTimeString();
+            $accessToken = $tokenRessult->accessToken;
             $response = [
                 'status' => 200,
                 'message' => 'Đăng nhập thành công',
-                'token' => $token,
+                'token' => $accessToken,
+                'token_type'=>'Bearer',
+                'expires_at'=>$expires,
             ];
         } else {
             $response = [
