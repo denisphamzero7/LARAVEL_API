@@ -3,15 +3,18 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+        "laravel/passport": "*",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "laravel/ui": "^4.6",
-        "tymon/jwt-auth": "^2.2"
+        "laravel/ui": "^4.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -28,8 +31,8 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },
-        "files":[
-           "app/Helper/Functions.php"
+        "files": [
+            "app/Helper/Functions.php"
         ]
     },
     "autoload-dev": {
@@ -85,6 +88,12 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-y2cr-5h3j-g3ys",
+                "PKSA-2kqm-ps5x-s4f5"
+            ]
         }
     },
     "minimum-stability": "stable",
