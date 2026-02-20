@@ -9,6 +9,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Laravel\Sanctum\PersonalAccessToken;
 use PhpParser\Node\Stmt\Else_;
+use Laravel\Passport\Client;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 
 class AuthController extends Controller
 {
@@ -19,6 +22,42 @@ class AuthController extends Controller
     {
         //
     }
+    // public function login(Request $request)
+    // {
+    //     //
+    //     $email = $request->email;
+    //     $password = $request->password;
+    //     $checklogin = Auth::attempt([
+    //         'email' => $email,
+    //         'password' => $password,
+    //     ]);
+    //     if ($checklogin) {
+    //         /** @var \App\Models\User $user */
+    //         $user = Auth::user();
+
+    //         // $token = $user->createToken('auth_token')->accessToken;: sanctum
+    //         $tokenRessult = $user->createToken('auth_api');
+    //         $token= $tokenRessult->token;
+    //         $token->expires_at = Carbon::now()->addMinutes(60);
+    //         $expires=Carbon::parse($token->expires_at)->toDateTimeString();
+    //         $accessToken = $tokenRessult->accessToken;
+    //         $response = [
+    //             'status' => 200,
+    //             'message' => 'Đăng nhập thành công',
+    //             'token' => $accessToken,
+    //             'token_type'=>'Bearer',
+    //             'expires_at'=>$expires,
+    //         ];
+    //     } else {
+    //         $response = [
+    //             'status' => 404,
+    //             'message' => 'Đăng nhập thất bại',
+    //         ];
+    //     }
+    //     return $response;
+    // }
+  
+
     public function login(Request $request)
     {
         //
@@ -33,18 +72,32 @@ class AuthController extends Controller
             $user = Auth::user();
 
             // $token = $user->createToken('auth_token')->accessToken;: sanctum
-            $tokenRessult = $user->createToken('auth_api');
-            $token= $tokenRessult->token;
-            $token->expires_at = Carbon::now()->addMinutes(60);
-            $expires=Carbon::parse($token->expires_at)->toDateTimeString();
-            $accessToken = $tokenRessult->accessToken;
-            $response = [
-                'status' => 200,
-                'message' => 'Đăng nhập thành công',
-                'token' => $accessToken,
-                'token_type'=>'Bearer',
-                'expires_at'=>$expires,
-            ];
+            // $tokenRessult = $user->createToken('auth_api');
+            // $token= $tokenRessult->token;
+            // $token->expires_at = Carbon::now()->addMinutes(60);
+            // $expires=Carbon::parse($token->expires_at)->toDateTimeString();
+            // $accessToken = $tokenRessult->accessToken;
+            $client = Client::where('grant_types', 'LIKE', '%password%')->first();
+            if($client){
+            $clientSecret = env('PASSPORT_CLIENT_SECRET');
+            $clientId = env('PASSPORT_CLIENT_ID');
+            $response = Http::asForm()->post('http://127.0.0.1:8001/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => $clientId,
+                'client_secret' =>$clientSecret, // Required for confidential clients only...
+                'username' => $email,
+                'password' => $password,
+                'scope' => '',
+            ]);
+            return $response;
+            // $response = [
+            //     'status' => 200,
+            //     'message' => 'Đăng nhập thành công',
+            //     'token' => $accessToken,
+            //     'token_type'=>'Bearer',
+            //     'expires_at'=>$expires,
+            // ];
+            }
         } else {
             $response = [
                 'status' => 404,
@@ -53,7 +106,8 @@ class AuthController extends Controller
         }
         return $response;
     }
-
+  
+  
     /**
      * Store a newly created resource in storage.
      */

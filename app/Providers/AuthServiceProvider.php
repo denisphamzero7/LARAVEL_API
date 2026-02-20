@@ -7,12 +7,14 @@ use App\Policies\GroupPolicy;
 use App\Models\Groups;
 use App\Models\Post;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Carbon\CarbonInterval;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\Modules;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Passport\Passport;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -33,7 +35,12 @@ class AuthServiceProvider extends ServiceProvider
     {
         //
         $this->registerPolicies();
- 
+        // Passport::ignoreRoutes();
+        // Passport::loadKeysFrom(__DIR__.'/../secrets/oauth');
+        Passport::enablePasswordGrant();
+        Passport::tokensExpireIn(CarbonInterval::minutes(60));
+        Passport::refreshTokensExpireIn(CarbonInterval::days(7));
+        Passport::personalAccessTokensExpireIn(CarbonInterval::months(6));
         ResetPassword::createUrlUsing(function ($doctor, string $token) {
             return 'http://example.com/doctors/reset-password?token=' . $token . '&email=' . urlencode($doctor->email);
         });
