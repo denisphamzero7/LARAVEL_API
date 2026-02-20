@@ -150,40 +150,91 @@ class AuthController extends Controller
             ], 200);
         };
     }
-    public function refreshToken(Request $request)
+    // public function refreshToken(Request $request)
+    // { sanctum
+    //     $hashToken = $request->header('Authorization');
+    //     $hashToken = str_replace('Bearer ', '', $hashToken);
+    //     $hashToken = trim($hashToken);
+    //     $token = PersonalAccessToken::findToken($hashToken);
+    //     if ($token) {
+    //         $tokenCreatedAt = $token->created_at;
+    //         $expire = Carbon::parse($tokenCreatedAt)->addMinutes(config('sanctum.expiration'));
+    //         if (Carbon::now()>=$expire) {
+    //             $userId = $token->tokenable_id;
+    //             $user = User::find($userId);
+    //             $user->tokens()->delete();
+    //             $newToken = $user->createToken('auth_token')->plainTextToken;
+    //             $response = [
+    //                 'status' => 200,
+    //                 'message' => 'Token đã được làm mới',
+    //                 'token' => $newToken,
+    //             ];
+    //         }else{
+    //             $response=[
+    //                 'status' => 400,
+    //                 'message' => 'Expire chưa hết, không cần làm mới token',
+    //             ];
+    //         }
+
+
+    //     }else{
+    //         $response=[
+    //             'status' => 404,
+    //             'message' => 'Token không hợp lệ',
+    //         ];
+    //         return response()->json($response, 404);
+    //     };
+    //     return response()->json($response, 200);
+    // }
+
+    public function refreshToken(Request $request) 
     {
-        $hashToken = $request->header('Authorization');
-        $hashToken = str_replace('Bearer ', '', $hashToken);
-        $hashToken = trim($hashToken);
-        $token = PersonalAccessToken::findToken($hashToken);
-        if ($token) {
-            $tokenCreatedAt = $token->created_at;
-            $expire = Carbon::parse($tokenCreatedAt)->addMinutes(config('sanctum.expiration'));
-            if (Carbon::now()>=$expire) {
-                $userId = $token->tokenable_id;
-                $user = User::find($userId);
-                $user->tokens()->delete();
-                $newToken = $user->createToken('auth_token')->plainTextToken;
-                $response = [
-                    'status' => 200,
-                    'message' => 'Token đã được làm mới',
-                    'token' => $newToken,
-                ];
-            }else{
-                $response=[
-                    'status' => 400,
-                    'message' => 'Expire chưa hết, không cần làm mới token',
-                ];
-            }
+        // 1. Check if refresh_token is present
+        if (!$request->has('refresh_token')) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Thiếu refresh_token trong request',
+            ], 400);
+        }
 
+        // 2. Get Client Credentials from .env
+        $clientId = env('PASSPORT_CLIENT_ID');
+        $clientSecret = env('PASSPORT_CLIENT_SECRET');
 
-        }else{
-            $response=[
-                'status' => 404,
-                'message' => 'Token không hợp lệ',
-            ];
-            return response()->json($response, 404);
-        };
-        return response()->json($response, 200);
+        // 3. Create Internal Request to /oauth/token
+        // Using app()->handle() avoids network issues and timeouts on local server
+        $tokenRequest = Request::create(
+            '/oauth/token',
+            'POST',
+            [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $request->refresh_token,
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'scope' => '',
+            ]
+        );
+
+        $tokenRequest->headers->set('Accept', 'application/json');
+        $tokenRequest->headers->set('Content-Type', 'application/x-www-form-urlencoded');
+
+        // 4. Dispatch Request internally
+        $response = app()->handle($tokenRequest);
+        $content = json_decode($response->getContent(), true);
+
+        // 5. Check Response
+        if ($response->getStatusCode() == 200) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Làm mới token thành công',
+                'data' => $content
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => $response->getStatusCode(),
+            'message' => 'Không thể làm mới token. Vui lòng đăng nhập lại.',
+            'error' => $content
+        ], $response->getStatusCode());
     }
 }

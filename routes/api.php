@@ -31,7 +31,7 @@ Route::middleware('auth:api')->prefix('user')->name('user.')->group(function(){
 Route::post('login',[AuthController::class,'login'])->name('auth.login');
 Route::get('token',[AuthController::class,'getToken'])->middleware('auth:api')->name('auth.token');
 // Route::get('token',[AuthController::class,'getToken'])->middleware('auth:sanctum')->name('auth.token');
-Route::get('refreshtoken',[AuthController::class,'refreshToken'])->name('auth.refresh.token');
+Route::post('refreshtoken',[AuthController::class,'refreshToken'])->name('auth.refresh.token');
 Route::get('passport-token',function () {
     $user = User::find(1);
     $tokenRessult = $user->createToken('auth_api');
