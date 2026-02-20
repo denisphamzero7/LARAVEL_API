@@ -18,9 +18,40 @@ class AuthController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login']]);
+    }
     public function index()
     {
         //
+    }
+      public function login()
+    {
+        $credentials = request(['email', 'password']);
+
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $this->respondWithToken($token);
+    }
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
+    }
+    public function profile(){
+        return response()->json(auth()->user());
+    }
+    public function logout(){
+       auth()->logout();
+       return response()->json([
+        'message' => 'Successfully logged out',
+       ]);
     }
     // public function login(Request $request)
     // {
@@ -58,54 +89,54 @@ class AuthController extends Controller
     // }
   
 
-    public function login(Request $request)
-    {
-        //
-        $email = $request->email;
-        $password = $request->password;
-        $checklogin = Auth::attempt([
-            'email' => $email,
-            'password' => $password,
-        ]);
-        if ($checklogin) {
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
+    // passport : public function login(Request $request)
+    // {
+    //     //
+    //     $email = $request->email;
+    //     $password = $request->password;
+    //     $checklogin = Auth::attempt([
+    //         'email' => $email,
+    //         'password' => $password,
+    //     ]);
+    //     if ($checklogin) {
+    //         /** @var \App\Models\User $user */
+    //         $user = Auth::user();
 
-            // $token = $user->createToken('auth_token')->accessToken;: sanctum
-            // $tokenRessult = $user->createToken('auth_api');
-            // $token= $tokenRessult->token;
-            // $token->expires_at = Carbon::now()->addMinutes(60);
-            // $expires=Carbon::parse($token->expires_at)->toDateTimeString();
-            // $accessToken = $tokenRessult->accessToken;
-            $client = Client::where('grant_types', 'LIKE', '%password%')->first();
-            if($client){
-            $clientSecret = env('PASSPORT_CLIENT_SECRET');
-            $clientId = env('PASSPORT_CLIENT_ID');
-            $response = Http::asForm()->post('http://127.0.0.1:8001/oauth/token', [
-                'grant_type' => 'password',
-                'client_id' => $clientId,
-                'client_secret' =>$clientSecret, // Required for confidential clients only...
-                'username' => $email,
-                'password' => $password,
-                'scope' => '',
-            ]);
-            return $response;
-            // $response = [
-            //     'status' => 200,
-            //     'message' => 'Đăng nhập thành công',
-            //     'token' => $accessToken,
-            //     'token_type'=>'Bearer',
-            //     'expires_at'=>$expires,
-            // ];
-            }
-        } else {
-            $response = [
-                'status' => 404,
-                'message' => 'Đăng nhập thất bại',
-            ];
-        }
-        return $response;
-    }
+    //         // $token = $user->createToken('auth_token')->accessToken;: sanctum
+    //         // $tokenRessult = $user->createToken('auth_api');
+    //         // $token= $tokenRessult->token;
+    //         // $token->expires_at = Carbon::now()->addMinutes(60);
+    //         // $expires=Carbon::parse($token->expires_at)->toDateTimeString();
+    //         // $accessToken = $tokenRessult->accessToken;
+    //         $client = Client::where('grant_types', 'LIKE', '%password%')->first();
+    //         if($client){
+    //         $clientSecret = env('PASSPORT_CLIENT_SECRET');
+    //         $clientId = env('PASSPORT_CLIENT_ID');
+    //         $response = Http::asForm()->post('http://127.0.0.1:8001/oauth/token', [
+    //             'grant_type' => 'password',
+    //             'client_id' => $clientId,
+    //             'client_secret' =>$clientSecret, // Required for confidential clients only...
+    //             'username' => $email,
+    //             'password' => $password,
+    //             'scope' => '',
+    //         ]);
+    //         return $response;
+    //         // $response = [
+    //         //     'status' => 200,
+    //         //     'message' => 'Đăng nhập thành công',
+    //         //     'token' => $accessToken,
+    //         //     'token_type'=>'Bearer',
+    //         //     'expires_at'=>$expires,
+    //         // ];
+    //         }
+    //     } else {
+    //         $response = [
+    //             'status' => 404,
+    //             'message' => 'Đăng nhập thất bại',
+    //         ];
+    //     }
+    //     return $response;
+    // }
   
   
     /**

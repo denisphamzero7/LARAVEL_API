@@ -4,5 +4,5 @@ return [
     App\Providers\AppServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
-    Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+    PHPOpenSourceSaver\JWTAuth\Providers\LaravelServiceProvider::class,
 ];

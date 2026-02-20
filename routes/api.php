@@ -28,7 +28,7 @@ Route::middleware('auth:api')->prefix('user')->name('user.')->group(function(){
     Route::patch('/{user}',[UserController::class,'update'])->name('update-patch');
     Route::delete('/{user}',[UserController::class,'destroy'])->name('destroy');
 });
-Route::post('login',[AuthController::class,'login'])->name('auth.login');
+// Route::post('login',[AuthController::class,'login'])->name('auth.login');
 Route::get('token',[AuthController::class,'getToken'])->middleware('auth:api')->name('auth.token');
 // Route::get('token',[AuthController::class,'getToken'])->middleware('auth:sanctum')->name('auth.token');
 Route::post('refreshtoken',[AuthController::class,'refreshToken'])->name('auth.refresh.token');
@@ -46,4 +46,20 @@ Route::get('passport-token',function () {
         'expires_at'=>$expires,
     ];
     return response()->json($response);
+});
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'auth'
+
+], function ($router) {
+       
+    Route::post('login',[AuthController::class,'login'])->name('auth.login');
+    Route::get('profile',[AuthController::class,'profile'])->name('auth.profile');
+    Route::post('logout', [AuthController::class,'logout'])->name('auth.logout');
+    // Route::post('login', 'AuthController@login');
+    
+    // Route::post('refresh', 'AuthController@refresh');
+    // Route::post('me', 'AuthController@me');
+
 });

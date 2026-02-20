@@ -25,6 +25,7 @@ class UserSeeder extends Seeder
           'name' => 'Admin',
           'email' => 'admin@gmail.com',
           'password' => Hash::make('123456'),
+          'user_id'=>0,
           'created_at' => date('Y-m-d H:i:s'),
           'updated_at' => date('Y-m-d H:i:s'),
         ]);
@@ -37,6 +38,7 @@ class UserSeeder extends Seeder
             'name' => $faker->name(),
             'email' => $faker->unique()->safeEmail(),
             'password' => Hash::make('password'),
+            'user_id'=>0,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
           ];
