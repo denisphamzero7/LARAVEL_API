@@ -12,6 +12,8 @@ use PhpParser\Node\Stmt\Else_;
 use Laravel\Passport\Client;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
@@ -20,7 +22,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'refresh']]);
     }
     public function index()
     {
@@ -30,22 +32,43 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
+        if (! $token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        return $this->respondWithToken($token);
+        // auth('api')->invalidate();
+        $refreshToken = $this->createRefreshToken();
+        return $this->respondWithToken($token, $refreshToken);
     }
-    protected function respondWithToken($token)
+    protected function respondWithToken($token,$refreshToken)
     {
         return response()->json([
             'access_token' => $token,
+            'refresh_token' => $refreshToken,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
-    public function profile(){
-        return response()->json(auth()->user());
+     public function createRefreshToken(){
+        
+        $data = [
+            'sub' => auth('api')->user()->id,
+            'random'  => rand() . time(),
+            'exp'     => time() + config('jwt.refresh_ttl') * 60,
+        ];
+        $refreshToken = JWTAuth::getJWTProvider()->encode($data);
+        return $refreshToken;
+    }
+    public function profile()
+    {
+        try {
+            // Ép buộc kiểm tra token (bao gồm cả blacklist)
+            if (! $user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'User không tồn tại'], 404);
+            }
+            return response()->json($user);
+        } catch (JWTException $e) {
+            return response()->json(['message' => 'Token không hợp lệ hoặc đã bị vô hiệu hóa (Blacklisted)'], 401);
+        }
     }
     public function logout(){
        auth()->logout();
@@ -172,7 +195,7 @@ class AuthController extends Controller
     }
     public function getToken(Request $request)
     {
-        $deleted = $request->user()->token()->revoke();
+        $deleted = $request->user('api')->token()->revoke();
 
         if ($deleted) {
             return response()->json([
@@ -217,55 +240,89 @@ class AuthController extends Controller
     //     };
     //     return response()->json($response, 200);
     // }
-
-    public function refreshToken(Request $request) 
+    public function refresh()
     {
-        // 1. Check if refresh_token is present
-        if (!$request->has('refresh_token')) {
+        $refreshToken = request()->refresh_token;
+        try {
+            // 1. Giải mã refresh token để lấy user
+            $decode = JWTAuth::getJWTProvider()->decode($refreshToken);
+            $user = User::find($decode['sub']);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Người dùng không tồn tại',
+                ], 404);
+            }
+
+            // 2. VÔ HIỆU HÓA Access Token cũ (Blacklist)
+            // Client nên gửi Access Token cũ trong Header Authorization để server có thể hủy nó
+            try {
+                auth('api')->invalidate(true);
+            } catch (\Exception $e) {
+                // Bỏ qua nếu token cũ không tồn tại hoặc đã bị hủy trước đó
+            }
+
+            // 3. Tạo Access Token mới và Refresh Token mới (Rotation)
+            $token = auth('api')->login($user);
+            $newRefreshToken = $this->createRefreshToken();
+
+            return $this->respondWithToken($token, $newRefreshToken);
+        } catch (JWTException $e) {
             return response()->json([
-                'status' => 400,
-                'message' => 'Thiếu refresh_token trong request',
-            ], 400);
+                'message' => 'Refresh Token không hợp lệ hoặc đã hết hạn',
+            ], 401);
         }
-
-        // 2. Get Client Credentials from .env
-        $clientId = env('PASSPORT_CLIENT_ID');
-        $clientSecret = env('PASSPORT_CLIENT_SECRET');
-
-        // 3. Create Internal Request to /oauth/token
-        // Using app()->handle() avoids network issues and timeouts on local server
-        $tokenRequest = Request::create(
-            '/oauth/token',
-            'POST',
-            [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $request->refresh_token,
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'scope' => '',
-            ]
-        );
-
-        $tokenRequest->headers->set('Accept', 'application/json');
-        $tokenRequest->headers->set('Content-Type', 'application/x-www-form-urlencoded');
-
-        // 4. Dispatch Request internally
-        $response = app()->handle($tokenRequest);
-        $content = json_decode($response->getContent(), true);
-
-        // 5. Check Response
-        if ($response->getStatusCode() == 200) {
-            return response()->json([
-                'status' => 200,
-                'message' => 'Làm mới token thành công',
-                'data' => $content
-            ], 200);
-        }
-
-        return response()->json([
-            'status' => $response->getStatusCode(),
-            'message' => 'Không thể làm mới token. Vui lòng đăng nhập lại.',
-            'error' => $content
-        ], $response->getStatusCode());
     }
+   
+    // refresh passport
+    // public function refreshToken(Request $request) 
+    // {
+    //     // 1. Check if refresh_token is present
+    //     if (!$request->has('refresh_token')) {
+    //         return response()->json([
+    //             'status' => 400,
+    //             'message' => 'Thiếu refresh_token trong request',
+    //         ], 400);
+    //     }
+
+    //     // 2. Get Client Credentials from .env
+    //     $clientId = env('PASSPORT_CLIENT_ID');
+    //     $clientSecret = env('PASSPORT_CLIENT_SECRET');
+
+    //     // 3. Create Internal Request to /oauth/token
+    //     // Using app()->handle() avoids network issues and timeouts on local server
+    //     $tokenRequest = Request::create(
+    //         '/oauth/token',
+    //         'POST',
+    //         [
+    //             'grant_type' => 'refresh_token',
+    //             'refresh_token' => $request->refresh_token,
+    //             'client_id' => $clientId,
+    //             'client_secret' => $clientSecret,
+    //             'scope' => '',
+    //         ]
+    //     );
+
+    //     $tokenRequest->headers->set('Accept', 'application/json');
+    //     $tokenRequest->headers->set('Content-Type', 'application/x-www-form-urlencoded');
+
+    //     // 4. Dispatch Request internally
+    //     $response = app()->handle($tokenRequest);
+    //     $content = json_decode($response->getContent(), true);
+
+    //     // 5. Check Response
+    //     if ($response->getStatusCode() == 200) {
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Làm mới token thành công',
+    //             'data' => $content
+    //         ], 200);
+    //     }
+
+    //     return response()->json([
+    //         'status' => $response->getStatusCode(),
+    //         'message' => 'Không thể làm mới token. Vui lòng đăng nhập lại.',
+    //         'error' => $content
+    //     ], $response->getStatusCode());
+    // }
 }
